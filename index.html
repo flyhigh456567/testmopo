@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinePosters | 限量電影特典海報</title>
+    <!-- 引入 Tailwind CSS 提升排版質感 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen flex flex-col">
+
+    <!-- 導覽列 -->
+    <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold tracking-wider cursor-pointer text-amber-400" onclick="router('home')">🎬 CinePosters</h1>
+            <nav class="space-x-6 flex items-center">
+                <button onclick="router('home')" class="hover:text-amber-400 transition">首頁商城</button>
+                <button id="nav-manage" onclick="router('manage')" class="hidden hover:text-amber-400 transition">上架商品</button>
+                <button id="nav-cart" onclick="router('cart')" class="hidden hover:text-amber-400 transition relative">購物車 <span id="cart-badge" class="bg-amber-500 text-gray-900 text-xs px-1.5 py-0.5 rounded-full font-bold">0</span></button>
+                <button id="nav-profile" onclick="router('profile')" class="hidden hover:text-amber-400 transition">會員中心</button>
+                <button id="nav-auth" onclick="router('auth')" class="bg-amber-500 text-gray-900 px-4 py-2 rounded font-semibold hover:bg-amber-400 transition">登入 / 註冊</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要內容容器 -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
+
+        <!-- 1. 首頁 / 產品列表 -->
+        <section id="view-home" class="space-y-6">
+            <div class="text-center py-10 bg-gradient-to-r from-gray-800 to-gray-800/50 rounded-2xl border border-gray-700">
+                <h2 class="text-4xl font-extrabold text-amber-400 mb-2">珍藏每一幕感動</h2>
+                <p class="text-gray-400">精選全球官方正版、限量發售電影特典海報</p>
+            </div>
+            <div id="product-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- 動態載入商品 -->
+            </div>
+        </section>
+
+        <!-- 2. 產品細節頁 -->
+        <section id="view-detail" class="hidden">
+            <button onclick="router('home')" class="mb-6 text-sm text-gray-400 hover:text-white">&larr; 返回商品列表</button>
+            <div id="product-detail-content" class="grid grid-cols-1 md:grid-cols-2 gap-10 bg-gray-800 p-8 rounded-2xl border border-gray-700">
+                <!-- 動態載入商品細節 -->
+            </div>
+        </section>
+
+        <!-- 3. 登入 / 註冊頁 -->
+        <section id="view-auth" class="hidden max-w-md mx-auto bg-gray-800 p-8 rounded-2xl border border-gray-700 mt-10">
+            <div class="flex border-b border-gray-700 mb-6">
+                <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 pb-3 font-bold text-amber-400 border-b-2 border-amber-400">會員登入</button>
+                <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 pb-3 font-bold text-gray-400">註冊帳號</button>
+            </div>
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <div id="register-fields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">姓名 / 暱稱</label>
+                        <input type="text" id="auth-name" class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">電子郵件</label>
+                    <input type="email" id="auth-email" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">密碼</label>
+                    <input type="password" id="auth-password" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                </div>
+                <button type="submit" id="auth-submit-btn" class="w-full bg-amber-500 text-gray-900 font-bold py-2 rounded hover:bg-amber-400 transition">登入</button>
+                <p id="auth-error" class="text-red-400 text-sm text-center"></p>
+            </form>
+        </section>
+
+        <!-- 4. 會員資料維護 -->
+        <section id="view-profile" class="hidden max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl border border-gray-700 mt-10 space-y-6">
+            <h3 class="text-2xl font-bold text-amber-400 border-b border-gray-700 pb-3">會員資料維護</h3>
+            <form id="profile-form" onsubmit="updateProfile(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">電子郵件 (無法修改)</label>
+                    <input type="email" id="profile-email" disabled class="w-full bg-gray-900/50 border border-gray-700 rounded px-4 py-2 text-gray-500">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">姓名 / 暱稱</label>
+                    <input type="text" id="profile-name" class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">收件電話</label>
+                    <input type="text" id="profile-phone" class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">預設收件地址</label>
+                    <textarea id="profile-address" rows="3" class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-amber-500 text-gray-900 font-bold py-2 rounded hover:bg-amber-400 transition">儲存修改</button>
+            </form>
+            <div class="border-t border-gray-700 pt-6 flex justify-between items-center">
+                <span class="text-sm text-red-400">需要登出帳號嗎？</span>
+                <button onclick="logout()" class="bg-red-600/20 text-red-400 border border-red-600/50 px-4 py-2 rounded hover:bg-red-600 hover:text-white transition">登出帳號</button>
+            </div>
+        </section>
+
+        <!-- 5. 產品資料建立 (上架) -->
+        <section id="view-manage" class="hidden max-w-xl mx-auto bg-gray-800 p-8 rounded-2xl border border-gray-700 mt-10 space-y-6">
+            <h3 class="text-2xl font-bold text-amber-400 border-b border-gray-700 pb-3">上架新電影特典海報</h3>
+            <form onsubmit="createProduct(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">電影名稱</label>
+                    <input type="text" id="prod-title" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400" placeholder="例如：全面啟動 IMAX 雙面特典海報">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">圖片網址 (URL)</label>
+                    <input type="url" id="prod-image" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400" placeholder="https://example.com/poster.jpg">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">價格 (NT$)</label>
+                        <input type="number" id="prod-price" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">庫存數量</label>
+                        <input type="number" id="prod-stock" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">海報詳細規格與故事背景</label>
+                    <textarea id="prod-desc" rows="4" required class="w-full bg-gray-900 border border-gray-700 rounded px-4 py-2 focus:outline-none focus:border-amber-400" placeholder="尺寸、磅數、印刷工藝..."></textarea>
+                </div>
+                <button type="submit" class="w-full bg-amber-500 text-gray-900 font-bold py-2 rounded hover:bg-amber-400 transition">確認上架</button>
+            </form>
+        </section>
+
+        <!-- 6. 購物車與結帳頁 -->
+        <section id="view-cart" class="hidden max-w-3xl mx-auto space-y-6">
+            <h3 class="text-2xl font-bold text-amber-400 border-b border-gray-700 pb-3">您的購物車</h3>
+            <div id="cart-items" class="space-y-4">
+                <!-- 動態載入購物車品項 -->
+            </div>
+            <div id="cart-summary" class="bg-gray-800 p-6 rounded-2xl border border-gray-700 flex justify-between items-center hidden">
+                <div>
+                    <p class="text-gray-400">總金額：<span id="cart-total" class="text-2xl font-bold text-amber-400">NT$0</span></p>
+                </div>
+                <button onclick="checkout()" class="bg-amber-500 text-gray-900 px-6 py-3 rounded font-bold hover:bg-amber-400 transition">前往模擬付款</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-gray-800 border-t border-gray-700 mt-16 py-6 text-center text-sm text-gray-500">
+        &copy; 2026 CinePosters 限量電影特典海報販售網. All rights reserved.
+    </footer>
+
+    <!-- Firebase SDKs 與 應用邏輯 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // === 替換為你的 Firebase 配置 ===
+        const firebaseConfig = {
+              apiKey: "AIzaSyCPn42McqMxCM8t4I5O9K6mlfqmKCS3Cnw",
+              authDomain: "test-mopo.firebaseapp.com",
+              projectId: "test-mopo",
+              storageBucket: "test-mopo.firebasestorage.app",
+              messagingSenderId: "592058479093",
+              appId: "1:592058479093:web:258bf1aff19a4f58c730bc",
+              measurementId: "G-EWV7WCS9JQ"
+              };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let cart = [];
+        let currentAuthMode = 'login';
+        let currentProductData = null;
+
+        // 頁面路由切換
+        window.router = function(viewName, param = null) {
+            ['home', 'detail', 'auth', 'profile', 'manage', 'cart'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            if (viewName === 'home') loadProducts();
+            if (viewName === 'detail' && param) loadProductDetail(param);
+            if (viewName === 'cart') renderCart();
+        }
+
+        // 監聽登入狀態
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            const navAuth = document.getElementById('nav-auth');
+            const navProfile = document.getElementById('nav-profile');
+            const navManage = document.getElementById('nav-manage');
+            const navCart = document.getElementById('nav-cart');
+
+            if (user) {
+                navAuth.innerText = "會員中心";
+                navAuth.setAttribute("onclick", "router('profile')");
+                navProfile.classList.remove('hidden');
+                navManage.classList.remove('hidden');
+                navCart.classList.remove('hidden');
+                loadUserProfile(user.uid);
+            } else {
+                navAuth.innerText = "登入 / 註冊";
+                navAuth.setAttribute("onclick", "router('auth')");
+                navProfile.classList.add('hidden');
+                navManage.classList.add('hidden');
+                navCart.classList.add('hidden');
+            }
+        });
+
+        // 登入 / 註冊 Tab 切換
+        window.switchAuthTab = function(mode) {
+            currentAuthMode = mode;
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
+            const regFields = document.getElementById('register-fields');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (mode === 'login') {
+                loginBtn.className = "flex-1 pb-3 font-bold text-amber-400 border-b-2 border-amber-400";
+                regBtn.className = "flex-1 pb-3 font-bold text-gray-400";
+                regFields.classList.add('hidden');
+                submitBtn.innerText = "登入";
+            } else {
+                regBtn.className = "flex-1 pb-3 font-bold text-amber-400 border-b-2 border-amber-400";
+                loginBtn.className = "flex-1 pb-3 font-bold text-gray-400";
+                regFields.classList.remove('hidden');
+                submitBtn.innerText = "註冊帳號";
+            }
+        }
+
+        // 處理登入與註冊
+        window.handleAuth = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const name = document.getElementById('auth-name').value;
+            const errorEl = document.getElementById('auth-error');
+            errorEl.innerText = "";
+
+            try {
+                if (currentAuthMode === 'register') {
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await setDoc(doc(db, "users", res.user.uid), {
+                        name: name || "電影同好",
+                        email: email,
+                        phone: "",
+                        address: ""
+                    });
+                } else {
+                    await signInWithEmailAndPassword(auth, email, password);
+                }
+                router('home');
+            } catch (err) {
+                errorEl.innerText = "操作失敗：" + err.message;
+            }
+        }
+
+        // 登出
+        window.logout = async function() {
+            await signOut(auth);
+            router('home');
+        }
+
+        // 載入會員資料
+        async function loadUserProfile(uid) {
+            const docRef = doc(db, "users", uid);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('profile-email').value = data.email || '';
+                document.getElementById('profile-name').value = data.name || '';
+                document.getElementById('profile-phone').value = data.phone || '';
+                document.getElementById('profile-address').value = data.address || '';
+            }
+        }
+
+        // 更新會員資料
+        window.updateProfile = async function(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+            try {
+                await updateDoc(doc(db, "users", currentUser.uid), {
+                    name: document.getElementById('profile-name').value,
+                    phone: document.getElementById('profile-phone').value,
+                    address: document.getElementById('profile-address').value
+                });
+                alert("會員資料更新成功！");
+            } catch (err) {
+                alert("更新失敗：" + err.message);
+            }
+        }
+
+        // 建立產品 (上架)
+        window.createProduct = async function(e) {
+            e.preventDefault();
+            try {
+                await addDoc(collection(db, "products"), {
+                    title: document.getElementById('prod-title').value,
+                    image: document.getElementById('prod-image').value,
+                    price: Number(document.getElementById('prod-price').value),
+                    stock: Number(document.getElementById('prod-stock').value),
+                    description: document.getElementById('prod-desc').value,
+                    createdAt: new Date()
+                });
+                alert("海報上架成功！");
+                e.target.reset();
+                router('home');
+            } catch (err) {
+                alert("上架失敗：" + err.message);
+            }
+        }
+
+        // 載入產品列表
+        async function loadProducts() {
+            const listEl = document.getElementById('product-list');
+            listEl.innerHTML = '<p class="col-span-full text-center text-gray-500">載入特典海報中...</p>';
+            
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                if (querySnapshot.empty) {
+                    listEl.innerHTML = '<p class="col-span-full text-center text-gray-500">目前尚無上架的電影海報。</p>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                querySnapshot.forEach((docSnap) => {
+                    const p = docSnap.data();
+                    const id = docSnap.id;
+                    listEl.innerHTML += `
+                        <div class="bg-gray-800 rounded-xl overflow-hidden border border-gray-700 hover:border-amber-400 transition cursor-pointer flex flex-col" onclick="router('detail', '${id}')">
+                            <img src="${p.image}" alt="${p.title}" class="w-full h-72 object-cover" onerror="this.src='https://via.placeholder.com/300x400?text=No+Image'">
+                            <div class="p-4 flex flex-col flex-grow justify-between">
+                                <div>
+                                    <h3 class="font-bold text-lg mb-1 line-clamp-1">${p.title}</h3>
+                                    <p class="text-amber-400 font-extrabold text-lg">NT$ ${p.price}</p>
+                                </div>
+                                <span class="mt-4 text-center block w-full bg-gray-700 text-sm py-2 rounded font-semibold hover:bg-amber-500 hover:text-gray-900 transition">查看詳情</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                listEl.innerHTML = `<p class="col-span-full text-center text-red-400">載入失敗：${err.message}</p>`;
+            }
+        }
+
+        // 載入產品細節
+        async function loadProductDetail(id) {
+            const container = document.getElementById('product-detail-content');
+            container.innerHTML = '<p class="text-gray-500">載入詳情中...</p>';
+            
+            try {
+                const docSnap = await getDoc(doc(db, "products", id));
+                if (!docSnap.exists()) {
+                    container.innerHTML = '<p class="text-red-400">找不到此海報商品。</p>';
+                    return;
+                }
+                const p = docSnap.data();
+                currentProductData = { id, ...p };
+
+                container.innerHTML = `
+                    <div class="rounded-xl overflow-hidden border border-gray-700">
+                        <img src="${p.image}" alt="${p.title}" class="w-full h-auto object-cover">
+                    </div>
+                    <div class="space-y-6 flex flex-col justify-center">
+                        <h2 class="text-3xl font-extrabold">${p.title}</h2>
+                        <p class="text-3xl font-bold text-amber-400">NT$ ${p.price}</p>
+                        <p class="text-gray-300 leading-relaxed whitespace-pre-line">${p.description}</p>
+                        <p class="text-sm text-gray-500">剩餘庫存：${p.stock} 張</p>
+                        <button onclick="addToCart()" class="w-full bg-amber-500 text-gray-900 font-bold py-3 rounded-lg hover:bg-amber-400 transition">加入購物車</button>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<p class="text-red-400">讀取失敗：${err.message}</p>`;
+            }
+        }
+
+        // 加入購物車
+        window.addToCart = function() {
+            if (!currentUser) {
+                alert("請先登入會員才能購買商品！");
+                router('auth');
+                return;
+            }
+            const existing = cart.find(item => item.id === currentProductData.id);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                cart.push({ ...currentProductData, quantity: 1 });
+            }
+            updateCartBadge();
+            alert("已成功加入購物車！");
+        }
+
+        function updateCartBadge() {
+            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.getElementById('cart-badge').innerText = totalQty;
+        }
+
+        // 渲染購物車
+        window.renderCart = function() {
+            const container = document.getElementById('cart-items');
+            const summary = document.getElementById('cart-summary');
+            
+            if (cart.length === 0) {
+                container.innerHTML = '<p class="text-center text-gray-500 py-10">購物車目前是空的。</p>';
+                summary.classList.add('hidden');
+                return;
+            }
+
+            container.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price * item.quantity;
+                container.innerHTML += `
+                    <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <img src="${item.image}" class="w-16 h-20 object-cover rounded">
+                            <div>
+                                <h4 class="font-bold">${item.title}</h4>
+                                <p class="text-amber-400 text-sm">NT$ ${item.price} x ${item.quantity}</p>
+                            </div>
+                        </div>
+                        <button onclick="removeFromCart(${index})" class="text-red-400 text-sm hover:underline">移除</button>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cart-total').innerText = `NT$ ${total}`;
+            summary.classList.remove('hidden');
+        }
+
+        window.removeFromCart = function(index) {
+            cart.splice(index, 1);
+            updateCartBadge();
+            renderCart();
+        }
+
+        // 模擬付款與建立訂單
+        window.checkout = async function() {
+            if (!currentUser) return;
+            try {
+                const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                await addDoc(collection(db, "orders"), {
+                    userId: currentUser.uid,
+                    items: cart,
+                    totalAmount: total,
+                    status: "已付款 (模擬)",
+                    createdAt: new Date()
+                });
+                alert("模擬付款成功！感謝您的訂購，我們將盡快為您安排包裝寄送特典海報。");
+                cart = [];
+                updateCartBadge();
+                router('home');
+            } catch (err) {
+                alert("結帳失敗：" + err.message);
+            }
+        }
+    </script>
+</body>
+</html>
